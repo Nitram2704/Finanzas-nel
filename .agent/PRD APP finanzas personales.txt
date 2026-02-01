@@ -1,0 +1,63 @@
+﻿Documento de Requisitos del Producto (PRD): FinanceSheet Companion
+Versión: 1.0
+Estado: Listo para Desarrollo
+Rol: Senior Product Manager & Arquitecto de Software
+________________
+
+
+1. Resumen Ejecutivo
+* Visión del Producto: Una extensión móvil y web para el archivo "Presupuesto nel 2025.xlsx". La app elimina la complejidad de las hojas de cálculo, ofreciendo una interfaz de "entrada rápida" y un tablero de control visual tipo semáforo.
+* Público Objetivo: Gestión de finanzas personales (Usuario Único).
+* Propuesta de Valor: Registro manual en <10 segundos, OCR opcional para facturas y alertas de presupuesto en tiempo real sin abandonar Google Sheets.
+2. Alcance del Proyecto (Scope)
+* In-Scope:
+   * Sincronización bidireccional con Google Sheets (Lectura de presupuestos, escritura de registros).
+   * Dashboard con indicadores de "Disponible" y "Progreso de Gasto".
+   * Módulo de registro manual triple: Ingresos, Egresos y Ahorros.
+   * Extracción de datos por cámara (OCR) para el campo de Valor y Fecha.
+   * Alertas push/visuales al alcanzar límites de presupuesto.
+* Out-of-Scope:
+   * Edición de fórmulas internas del Excel.
+   * Soporte multi-archivo (un solo ID de Google Sheet configurado).
+3. Requisitos Funcionales (User Stories)
+ID
+	Historia de Usuario
+	Criterios de Aceptación (Gherkin)
+	US.1
+	Estatus Visual
+	Dado que entro a la app, cuando el presupuesto consumido es >90%, entonces el indicador debe cambiar a color ROJO.
+	US.2
+	Registro Manual
+	Dado que pulso "+", cuando elijo el tipo de registro y completo los campos, entonces se añade una fila al final de la hoja correspondiente en Sheets.
+	US.3
+	OCR Opcional
+	Dado que estoy en el formulario, cuando activo la cámara sobre una factura, entonces el campo "Valor" se pre-llena con el monto detectado.
+	US.4
+	Listas Dinámicas
+	Dado que el usuario abre el selector de categorías, cuando la app carga, entonces debe mostrar exactamente las categorías definidas en la hoja "Listas desplegables".
+	4. Especificaciones Técnicas
+Arquitectura de Software
+* Frontend: React Native (Expo) para despliegue en iOS, Android y Web con código compartido.
+* Integración: Google Sheets API v4 + Google Drive API (para almacenar fotos de facturas).
+* Middleware: Node.js (opcional) para procesar el OCR de Google Cloud Vision y evitar latencia en el móvil.
+Mapeo de Datos (Estructura de Google Sheets)
+La aplicación escribirá en las siguientes columnas de tu archivo:
+1. Registro Egresos: Fecha | Mes | Categoría | Valor | Descripción
+2. Registro Ingresos: Fecha | Mes | Categoría | Valor | Descripción
+3. Registro Ahorro: Fecha | Mes | Categoría | Valor | Descripción
+* Nota: El campo "Mes" se calculará automáticamente mediante la fecha seleccionada.
+5. Requisitos No Funcionales
+* Intuitividad: Máximo de 3 interacciones para completar un registro.
+* Seguridad: Inicio de sesión único con Google (OAuth 2.0).
+* Disponibilidad: El dashboard debe cargar los datos del presupuesto en menos de 2 segundos mediante caché local.
+6. UX/UI: Diseño "Fricción Cero"
+1. Pantalla de Inicio (Dashboard): * Número grande central: "Saldo Disponible hoy".
+   * Barra de progreso horizontal por cada categoría principal (Hogar, Comidas, Transporte).
+2. El Botón Mágico (+): * Botón flotante en la parte inferior central.
+   * Al tocarlo, despliega 3 burbujas: Verde (Ingreso), Rojo (Gasto), Azul (Ahorro).
+3. Formulario Inteligente: * Teclado numérico activo por defecto al entrar.
+   * Selectores grandes (tipo rueda o botones) para las categorías.
+7. Casos Borde (Edge Cases)
+* Sin Conexión: Si el registro falla, la app guarda el "pendientes" en el teléfono y reintenta cuando detecte internet.
+* Categoría Inexistente: Si el usuario no encuentra una categoría, se ofrece la opción "Otros/Imprevistos" para no bloquear el registro.
+* Error de Lectura OCR: Si el sistema no está seguro del monto de la factura, el campo parpadeará en amarillo para obligar a la validación manual del usuario.

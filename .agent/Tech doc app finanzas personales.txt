@@ -1,0 +1,67 @@
+﻿wTechnical Design Document: FinanceSheet Companion (Senior Edition 2026)
+Estado: Ready for Implementation
+Arquitecto: Senior Software Architect (AI-Driven Era)
+Fecha: Febrero 2026
+1. Resumen Técnico
+FinanceSheet Companion es una aplicación de alto rendimiento orientada a la gestión financiera personal. Utiliza una arquitectura Local-First para garantizar una experiencia de usuario de "Fricción Cero". El sistema actúa como una capa de interfaz inteligente sobre Google Sheets, utilizando procesamiento en el Edge y modelos de IA on-device para la captura de datos.
+2. Stack Tecnológico (Selección 2026)
+Capa
+	Tecnología
+	Razón Estratégica
+	Frontend
+	React Native + Expo (New Arch)
+	Rendimiento nativo con Fabric y despliegue rápido.
+	Local Database
+	SQLite + PowerSync
+	Sincronización bidireccional asíncrona y modo offline nativo.
+	Runtime / API
+	Bun + Hono
+	Runtime ultrarrápido y framework optimizado para Cloudflare/Supabase Edge.
+	Vision AI
+	React Native ExecuTorch
+	OCR ejecutado en el NPU del dispositivo para privacidad y velocidad <1s.
+	Infrastructure
+	Supabase & Google Cloud
+	Gestión de Auth (OAuth 2.0) y persistencia de respaldo.
+	3. Arquitectura de Sistema
+3.1. Flujo de Datos "Local-First"
+A diferencia de las arquitecturas tradicionales de "petición-respuesta", este sistema utiliza un patrón de Sincronización de Estado:
+1. El usuario interactúa con SQLite (latencia <10ms).
+2. PowerSync detecta el cambio en la base de datos local.
+3. Se dispara una Edge Function (Hono) que autentica con Google APIs.
+4. El registro se inserta en Google Sheets de forma asíncrona.
+5. Los límites de presupuesto se recalculan en la hoja y se reflejan de vuelta en el móvil sin recargar la app.
+3.2. Módulo de Inteligencia (OCR)
+Para cumplir con el registro en <10 segundos:
+* Se implementa ExecuTorch para procesar la imagen de la factura directamente en el hardware del móvil.
+* Esto elimina la necesidad de subir imágenes pesadas a la nube, reduciendo el consumo de datos y el tiempo de espera.
+4. Estrategia de Sincronización y Resiliencia
+* Conflict Resolution: Se aplica el principio de Last Write Wins (LWW) basado en timestamps atómicos para evitar colisiones si se edita el Excel y la app simultáneamente.
+* Retry Policy: Uso de Exponential Backoff para reintentos de escritura en Google Sheets en caso de límites de cuota (Rate Limiting).
+* Cache Strategy: El dashboard de "Semáforo" se sirve desde el estado local, garantizando carga en <2s incluso sin red.
+5. Esquema de Datos (Mapping)
+Campo App
+	Columna Google Sheets
+	Tipo de Dato
+	id
+	N/A (Internal)
+	UUID
+	amount
+	Valor
+	Decimal (Currency)
+	category
+	Categoría
+	String (Enum)
+	date
+	Fecha
+	ISO8601
+	description
+	Descripción
+	String
+	month_calc
+	Mes
+	Generated (Formula)
+	6. Key Selling Points (Para el Portafolio)
+* Eficiencia de Costos: Arquitectura Serverless que escala a cero cuando no se usa.
+* User Experience: Eliminación total de Spinners de carga mediante Optimistic UI.
+* Vanguardia Tech: Implementación de modelos de ML on-device, una habilidad altamente demandada en 2026.

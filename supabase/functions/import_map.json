@@ -1,0 +1,6 @@
+{
+    "imports": {
+        "std/": "https://deno.land/std@0.168.0/",
+        "google-auth-library": "https://esm.sh/google-auth-library@8.7.0"
+    }
+}

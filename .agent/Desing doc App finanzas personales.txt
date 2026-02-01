@@ -1,0 +1,84 @@
+﻿1. Arquitectura de Información y Navegación
+La aplicación utiliza una estructura de Navegación Plana para móvil y Barra Lateral para escritorio, maximizando la eficiencia de "Fricción Cero".
+Mapa del Sitio
+* Pantalla Principal (Dashboard): Visualización del estado financiero actual (Semáforo).
+* Acción Rápida (El Botón Mágico): Punto de entrada para registros (Ingreso, Gasto, Ahorro).
+* Historial de Transacciones: Lista de registros locales sincronizados con SQLite.
+* Configuración: Gestión de la conexión con Google Sheets y preferencias de OCR.
+________________
+
+
+2. Diseño de Interfaz (UI) & Design System
+Basado en el stack de React Native + Expo, utilizaremos un enfoque de Atomic Design.
+Paleta de Colores (Semántica)
+Propósito
+	Color Hex
+	Uso
+	Primario
+	#2563EB
+	Acciones principales y marca.
+	Éxito (Ingreso)
+	#10B981
+	Botón Ingreso, estado positivo.
+	Peligro (Gasto/Alerta)
+	#EF4444
+	Botón Gasto, alertas >90% presupuesto.
+	Ahorro
+	#3B82F6
+	Botón Ahorro, indicadores de reserva.
+	Advertencia
+	#F59E0B
+	Estado de duda en OCR.
+	Fondo
+	#F9FAFB
+	Superficies limpias para evitar fatiga visual.
+	Tipografía
+* Sistema: San Francisco (iOS), Roboto (Android/Web).
+* Pesos: Bold para montos (Saldo Disponible), Regular para etiquetas de categorías.
+________________
+
+
+3. Detalle de Pantallas Principales
+A. Dashboard "Semáforo"
+* Elementos UI:
+   * MainBalance: Widget con el saldo disponible calculado desde Google Sheets.
+   * BudgetProgressList: Barras de progreso por categoría (Hogar, Comidas, etc.).
+* Estados:
+   * Vacío: Mensaje "Sin datos, añade tu primer registro".
+   * Carga: Skeleton screens (tiempo <2s por caché local).
+   * Error: Indicador de "Desconectado" (pero funcional localmente).
+B. El Botón Mágico (+) & Formulario Inteligente
+* Interacción: Al tocar el FAB, se despliegan tres opciones: Ingreso, Gasto, Ahorro.
+* Formulario: * Input de valor con teclado numérico nativo por defecto.
+   * Botón de activación de OCR ExecuTorch para escaneo de facturas.
+   * Selectores de categoría tipo "Wheel" o botones grandes.
+________________
+
+
+4. Flujos de Usuario Críticos (User Flows)
+Flujo de Registro con OCR (Fricción Cero)
+1. Captura: El usuario activa el OCR en el formulario.
+2. Procesamiento Local: ExecuTorch extrae el amount en el NPU (<1s).
+3. Validación: Si hay duda, el campo parpadea en amarillo.
+4. Escritura Local: Se guarda en SQLite (latencia <10ms).
+5. Sincronización: PowerSync envía el cambio a la Edge Function de Hono para persistir en Google Sheets.
+________________
+
+
+5. Especificaciones para Stitch (Guía Técnica)
+Desglose de Componentes Modulares
+Componente
+	Lógica
+	Estilo (Tailwind/Native)
+	SyncBadge
+	Muestra estado de sincronización (Online/Pending).
+	rounded-full px-2 py-1 text-xs
+	TransactionCard
+	Muestra Fecha, Categoría y Valor.
+	flex-row justify-between p-4 bg-white
+	BudgetBar
+	Cambia a rojo si el progreso es >90%.
+	h-2 w-full rounded-bg bg-gray-200
+	OCRScanner
+	Hook de cámara con react-native-executorch.
+	flex-1 aspect-video
